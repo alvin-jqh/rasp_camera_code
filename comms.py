@@ -1,5 +1,6 @@
 import serial
 import time
+import msvcrt
 
 class SerialCommunication:
     def __init__(self, port, baudrate=9600, timeout=1):
@@ -33,7 +34,7 @@ class SerialCommunication:
     def read_data(self):
         if self.serial_connection and self.serial_connection.is_open:
             try:
-                data = self.serial_connection.read().decode()
+                data = self.serial_connection.readline().decode("ascii")
                 if data is not None:
                     print(f"Read data: {data}")
                 return data
@@ -73,18 +74,22 @@ class SerialCommunication:
 # Example usage:
 if __name__ == "__main__":
     # Replace 'COM1' with your actual serial port
-    serial_comm = SerialCommunication(port='COM3', baudrate=9600, timeout=1)
+    serial_comm = SerialCommunication(port='COM4', baudrate=9600, timeout=1)
     
     serial_comm.open_connection()
-    time.sleep(1)
+    # time.sleep(10)
+
+    counter = 0
     
     while True:
-        # Writing data
-        serial_comm.write_speeds(2.23,2.45)
 
-        # Reading data
-        received_data = serial_comm.read_data()
+        # # Writing data
+        serial_comm.write_speeds(1,1)
 
-        time.sleep(1)
+        
+        left, right, flag = serial_comm.read_speeds()
+        print(f"Left: {left}, Right: {right}, flag: {flag}")
+        # serial_comm.read_data()
+        serial_comm.serial_connection.reset_input_buffer()
 
-    serial_comm.close_connection()
+        # time.sleep(1)
