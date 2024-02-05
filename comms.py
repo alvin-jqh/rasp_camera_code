@@ -44,8 +44,8 @@ class SerialCommunication:
             print("Serial connection not open. Cannot read data.")
             return None
         
-    def write_speeds(self, left_speed:float, right_speed:float, proximity_flag:bool):
-        message = f"<{left_speed}, {right_speed}, {proximity_flag}>"
+    def write_speeds(self, left_speed:float, right_speed:float):
+        message = f"<{left_speed}, {right_speed}>"
         self.write_data(message)
 
     def read_speeds(self):
