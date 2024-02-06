@@ -80,13 +80,17 @@ class SerialCommunication:
 
                 if data:
                     print(f"Read data: {data}")
+                    self.serial_connection.reset_input_buffer()
                 return data
             except serial.SerialException as e:
                 print(f"Failed to read data. Error: {e}")
+                self.serial_connection.reset_input_buffer()
                 return None
         else:
             print("Serial connection not open. Cannot read data.")
+            self.serial_connection.reset_input_buffer()
             return None
+        
 
 # Example usage:
 if __name__ == "__main__":
@@ -107,7 +111,6 @@ if __name__ == "__main__":
         left, right, flag = serial_comm.read_speeds()
         print(f"Left: {left}, Right: {right}, flag: {flag}")
         # serial_comm.read_data()
-        serial_comm.serial_connection.reset_input_buffer()
 
         counter -= 10
         time.sleep(1)

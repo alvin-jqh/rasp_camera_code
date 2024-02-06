@@ -1,18 +1,34 @@
-from simple_pid import PID
 class ctl:
-    def __init__(self, distance_coeffs, angle_coeffs):
-        self.dKp, self.dKi, self.dKd = distance_coeffs
-        self.aKp, self.aKi, self.aKd = angle_coeffs
+    def __init__(self, distance_coeff = -2, angle_coeff = -0.4):
+        self.distance_coeff = distance_coeff
+        self.angle_coeff = angle_coeff
 
-        self.distance_ctl = PID(self.dKp, self.dKi, self.dKd, setpoint=100)
-        self.angle_ctl = PID(self.aKp, self.aKi, self.aKd, setpoint=320)
+        self.maxPWM = 255
+        self.setDistance = 100 # in cm
+        self.setXcoord = 320
+    
+    # makes sure the pwm value does not 
+    def clamp(self,pwm):
+        if abs(pwm) > self.maxPWM:
+            if pwm < 0:
+                return -self.maxPWM
+            else:
+                return self.maxPWM
+        else:
+            return pwm
+
 
     def compute_speeds(self, distance, x_coord):
-        straight_line_speed = self.distance_ctl(distance)
-        turning_add = self.angle_ctl(x_coord)
+        error_distance = self.setDistance - distance
+        error_angle = self.setXcoord - x_coord
 
-        left_speed = straight_line_speed + turning_add
-        right_speed = straight_line_speed - turning_add
+        pwmSignal = error_distance * self.distance_coeff
+        angle_pwm = error_angle * self.angle_coeff
 
-        return left_speed, right_speed
+        left_pwm = pwmSignal + angle_pwm
+        right_pwm = pwmSignal - angle_pwm
+
+        return self.clamp(left_pwm), self.clamp(right_pwm)
+
+
     
