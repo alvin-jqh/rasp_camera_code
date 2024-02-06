@@ -30,27 +30,13 @@ class SerialCommunication:
                 print(f"Failed to write data. Error: {e}")
         else:
             print("Serial connection not open. Cannot write data.")
-
-    def read_data(self):
-        if self.serial_connection and self.serial_connection.is_open:
-            try:
-                data = self.serial_connection.readline().decode("ascii")
-                if data is not None:
-                    print(f"Read data: {data}")
-                return data
-            except serial.SerialException as e:
-                print(f"Failed to read data. Error: {e}")
-                return None
-        else:
-            print("Serial connection not open. Cannot read data.")
-            return None
         
     def write_speeds(self, left_speed:float, right_speed:float):
         message = f"<{left_speed}, {right_speed}>"
         self.write_data(message)
 
     def read_speeds(self):
-        received_data = self.read_data()
+        received_data = self.read_data_until()
         line = received_data.strip()
         measured_left = measured_right = None
         proximity_flag = False
@@ -69,7 +55,38 @@ class SerialCommunication:
             print("Invalid data format. Expected data to be enclosed in '<' and '>'.")
 
         return measured_left, measured_right, proximity_flag
+    
+    def read_data_until(self, delimiter='\n', max_chars=100):
+        if self.serial_connection and self.serial_connection.is_open:
+            try:
+                data = ''
+                char_count = 0
 
+                # Read characters until the first '<'
+                while char_count < max_chars:
+                    char = self.serial_connection.read(1).decode()
+                    char_count += 1
+                    if char == '<':
+                        data += char
+                        break
+
+                # Read characters until the specified delimiter
+                while char_count < max_chars:
+                    char = self.serial_connection.read(1).decode()
+                    data += char
+                    char_count += 1
+                    if char == delimiter:
+                        break
+
+                if data:
+                    print(f"Read data: {data}")
+                return data
+            except serial.SerialException as e:
+                print(f"Failed to read data. Error: {e}")
+                return None
+        else:
+            print("Serial connection not open. Cannot read data.")
+            return None
 
 # Example usage:
 if __name__ == "__main__":
