@@ -68,6 +68,8 @@ class instance_segmentor:
                     cv2.putText(self.detected_frame, "TARGET", (cX - 20, cY + 20),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     
+                    if template_corners is not None:
+                        cv2.polylines(self.detected_frame,[np.int32(template_corners)], True,(0,0,255), 2)
                     # crop only for the target object
                     newX, newY, newW, newH = smart_crop(x,y,w,h,height,width)
                     target_crop = current_frame[newY:newY+newH, newX:newX+newW,:]

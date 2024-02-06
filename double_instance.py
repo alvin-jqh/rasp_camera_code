@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import time
 
 from read_matrices import read_intrinsics, read_R_T
 from camera_class import Camera, rectify
@@ -70,6 +71,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
         if right_detected_frame is not None:
             cv2.imshow("Right", right_detected_frame)
 
+        # time.sleep(1)
 
         if cv2.waitKey(1) == 27:
             break
