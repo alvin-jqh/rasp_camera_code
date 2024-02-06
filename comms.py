@@ -101,7 +101,7 @@ if __name__ == "__main__":
     while True:
 
         # # Writing data
-        serial_comm.write_speeds(1,1)
+        serial_comm.write_speeds(counter,counter)
 
         
         left, right, flag = serial_comm.read_speeds()
@@ -109,4 +109,5 @@ if __name__ == "__main__":
         # serial_comm.read_data()
         serial_comm.serial_connection.reset_input_buffer()
 
-        # time.sleep(1)
+        counter -= 10
+        time.sleep(1)
