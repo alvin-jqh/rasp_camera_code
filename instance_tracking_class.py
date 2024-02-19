@@ -71,6 +71,7 @@ class instance_segmentor:
                     if template_corners is not None:
                         cv2.polylines(self.detected_frame,[np.int32(template_corners)], True,(0,0,255), 2)
                     # crop only for the target object
+                    newX, newY, newW, newH = x,y,w,h
                     newX, newY, newW, newH = smart_crop(x,y,w,h,height,width)
                     target_crop = current_frame[newY:newY+newH, newX:newX+newW,:]
 
