@@ -260,8 +260,8 @@ class image_segmentor:
         self.segmentor.close()
 
 class gesture_recogniser:
-    def __init__(self, model: str, num_hands: int, min_hand_detection_confidence: float,
-        min_hand_presence_confidence: float, min_tracking_confidence: float):
+    def __init__(self, model: str, num_hands: int = 1, min_hand_detection_confidence: float = 0.5,
+        min_hand_presence_confidence: float = 0.5, min_tracking_confidence: float = 0.5):
         """Continuously run inference on images acquired from the camera.
 
             Args:

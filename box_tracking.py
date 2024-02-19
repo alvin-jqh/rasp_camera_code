@@ -2,16 +2,11 @@ import numpy as np
 import cv2
 from scipy.spatial import distance as dist 
 from collections import OrderedDict
-from template_matching import template_match
-from template_matching import sift_bfmatch
-from template_matching import orb_bfmatch
-from template_matching import orb_flannmatch
-from template_matching import brisk_flannmatch
 
-template_image = cv2.imread("images\cat_image_2.jpg")
+template_path = "images\cat_image_2.jpg"
 
 class tracker:
-    def __init__(self, maxDisappeared = 50):
+    def __init__(self, template_path:str, maxDisappeared = 50):
         """Takes in the maximum number of frames to be considered disappeared"""
         
         self.Objects = OrderedDict()    # stores the bounding boxes of each object
@@ -26,8 +21,67 @@ class tracker:
 
         self.maxDisappeared = maxDisappeared
 
+        self.template = cv2.imread(template_path)
+
+        # orb feature extractor
+        self.brisk = cv2.BRISK_create()
+
+        # create the flann based matcher
+        FLANN_INDEX_LSH = 6
+        index_params= dict(algorithm = FLANN_INDEX_LSH,
+                        table_number = 6, # 12
+                        key_size = 12,     # 20
+                        multi_probe_level = 1) #2
+        search_params = dict(checks=50)   # or pass empty dictionary
+
+        self.flann = cv2.FlannBasedMatcher(index_params, search_params)
+        self.extract_template_features()
+
+    # get the keypoints and features for the template image
+    def extract_template_features(self):
+        self.template_kp, self.template_des = self.brisk.detectAndCompute(self.template, None)
+
+    # target to tell whether or if the object is the target
+    def find_target(self, current_frame):
+        transformed_corners = None
+        object_kp, object_des = self.brisk.detectAndCompute(current_frame, None)
+
+        if object_des is not None and len(object_des) > 2:
+            matches = self.flann.knnMatch(self.template_des, object_des, k=2)
+            matches = [match for match in matches if len(match) == 2]
+
+            good_matches = []
+
+            for m,n in matches:
+                if m.distance < 0.67*n.distance:
+                    good_matches.append(m)
+            print(len(good_matches))
+
+            if len(good_matches) > 10:
+                template_pts = np.float32([self.template_kp[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+                current_frame_pts = np.float32([object_kp[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+
+                error_threshold = 5
+                H, _ = cv2.findHomography(template_pts, current_frame_pts, cv2.RANSAC, error_threshold)
+
+                if H is not None:
+                    # Get the corners of the template in the larger image
+                    h, w = self.template.shape[:2]
+                    template_corners = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+                    transformed_corners = cv2.perspectiveTransform(template_corners, H)
+                else:
+                    print("H is none")
+
+        return transformed_corners
+
     def get_target_ID(self):
         return self.TargetID
+    
+    def get_target_bbox(self):
+        if self.TargetID is not None:
+            return self.Objects[self.TargetID]
+        else:
+            return None
 
     def register(self, bounding_box):
         """Registers a new object with the next ID """
@@ -61,7 +115,7 @@ class tracker:
     
     def update(self, bounding_boxes, current_frame):
         """update the states of any objects"""
-        template_corners = brisk_flannmatch(current_frame, template_image)
+        template_corners = self.find_target(current_frame)
 
         # if target in frame
         if template_corners is not None:
@@ -71,7 +125,7 @@ class tracker:
         else:
             # if the target isn't in frame
             self.target_disappeared += 1
-            if self.target_disappeared > self.maxDisappeared:
+            if self.target_disappeared > self.maxDisappeared * 2:
                 self.TargetID = None 
 
         # if there has been nothing detected
@@ -159,4 +213,4 @@ class tracker:
                         self.TargetID = objectID
                         break
 
-        return self.Objects, template_corners     
+        return self.Objects, template_corners
