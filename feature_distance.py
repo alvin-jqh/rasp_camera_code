@@ -83,6 +83,7 @@ class match_distance:
     
     def find_distances(self, matched_coordinates, baseline, focal_length):
         distances = []
+        x_coords = []
         for left_point, right_point in matched_coordinates:
             xL, _ = left_point
             xR, _ = right_point
@@ -91,8 +92,10 @@ class match_distance:
 
             if disparity != 0:
                 distance = (baseline * focal_length) / disparity
-                distances.append(abs(distance))
-        distances = [distance for distance in distances if distance < 500]
-        avg_distance = np.mean(distances)
+                if distance < 500:
+                    distances.append(abs(distance))
+                    x_coords.append(xL)
 
-        return avg_distance
+        avg_distance = np.mean(distances)
+        avg_x = int(np.mean(x_coords))
+        return avg_distance, avg_x

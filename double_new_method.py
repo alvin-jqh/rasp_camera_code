@@ -65,6 +65,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
     # initialise the distance matching and variables
     dc = match_distance()
     distance = 0    
+    x_coord = int(width/2)
     matched_image = None
 
     # false means stop, true means go
@@ -126,7 +127,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
                                                                     left_target_bbox, right_target_bbox)
             
             if coordinate_matches is not None:
-                distance = dc.find_distances(coordinate_matches, baseline, avg_focal_length)
+                distance, x_coord = dc.find_distances(coordinate_matches, baseline, avg_focal_length)
             
         if left_annotated_frame is not None:
             h, w, _ = left_annotated_frame.shape
@@ -139,6 +140,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
                 
             cv2.putText(left_annotated_frame, f"{distance} cm", (10, h - 20), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.circle(left_annotated_frame, (x_coord, int(h/2)), 4, (0, 0, 255), -1 )
             cv2.imshow("Left", left_annotated_frame)
 
         if right_annotated_frame is not None:
