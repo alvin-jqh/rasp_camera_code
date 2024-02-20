@@ -45,10 +45,9 @@ class Camera:
             return False
     
 
-def rectify(left_image, right_image, left_camera_matrix, left_dist, righ_camera_matrix, right_dist, R, T):
+def rectify(height, width, left_camera_matrix, left_dist, righ_camera_matrix, right_dist, R, T):
     """Returns the Maps and ROI for both the left and right camers after rectification"""
-    width = left_image.shape[1]
-    height = right_image.shape[0]
+
     R1, R2, P1, P2, Q, ROI1, ROI2 = cv2.stereoRectify(left_camera_matrix, left_dist, 
                                                        righ_camera_matrix, right_dist, 
                                                         (width, height), R, T,
@@ -85,10 +84,7 @@ def rectify(left_image, right_image, left_camera_matrix, left_dist, righ_camera_
 
     newROI = (x, y, x1-x, y1-y)
 
-    undistorted_left = undistort(left_image, mapxL, mapyL, newROI)
-    undistorted_right = undistort(right_image, mapxR, mapyR, newROI)
-
-    return undistorted_left, undistorted_right
+    return mapxL, mapyL, mapxR, mapyR, newROI
 
 def undistort(image, mapx, mapy, ROI):
     """undistorts the image given the two maps and ROI"""
