@@ -1,11 +1,11 @@
 class ctl:
-    def __init__(self, distance_coeff = -2, angle_coeff = -0.4):
+    def __init__(self, distance_coeff = -2, angle_coeff = -0.2, centre_x = 320):
         self.distance_coeff = distance_coeff
         self.angle_coeff = angle_coeff
 
         self.maxPWM = 255
         self.setDistance = 100 # in cm
-        self.setXcoord = 320
+        self.setXcoord = centre_x
     
     # makes sure the pwm value does not 
     def clamp(self,pwm):
