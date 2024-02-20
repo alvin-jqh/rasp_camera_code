@@ -96,6 +96,6 @@ class match_distance:
                     distances.append(abs(distance))
                     x_coords.append(xL)
 
-        avg_distance = np.mean(distances)
+        avg_distance = np.median(distances)
         avg_x = int(np.mean(x_coords))
         return avg_distance, avg_x
