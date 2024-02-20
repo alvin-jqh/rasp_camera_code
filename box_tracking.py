@@ -125,7 +125,7 @@ class tracker:
         else:
             # if the target isn't in frame
             self.target_disappeared += 1
-            if self.target_disappeared > self.maxDisappeared * 2:
+            if self.target_disappeared > self.maxDisappeared :
                 self.TargetID = None 
 
         # if there has been nothing detected

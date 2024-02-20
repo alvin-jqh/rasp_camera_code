@@ -81,7 +81,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
 
     line = SerialCommunication(port, baudrate, timeout)
     line.open_connection()
-    controller = ctl(-2, -0.2, x_coord)
+    controller = ctl(-2, 0.2, x_coord)
     proximity_flag = False
 
     while left_cam.opened() and right_cam.opened:
@@ -164,7 +164,11 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
         if matched_image is not None: 
             cv2.imshow("match image", matched_image)
 
-        new_L_pwm, new_R_pwm = controller.compute_speeds(distance, x_coord)
+        if move_state:
+            new_L_pwm, new_R_pwm = controller.compute_speeds(distance, x_coord)
+        else:
+            new_L_pwm, new_R_pwm = controller.compute_speeds(100, x_coord)
+
         print(f"New Left PWM: {new_L_pwm},   New Right PWM: {new_R_pwm}")
 
         if not proximity_flag:

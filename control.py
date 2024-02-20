@@ -1,5 +1,5 @@
 class ctl:
-    def __init__(self, distance_coeff = -2, angle_coeff = -0.2, centre_x = 320):
+    def __init__(self, distance_coeff = -2, angle_coeff = 0.2, centre_x = 320):
         self.distance_coeff = distance_coeff
         self.angle_coeff = angle_coeff
 
