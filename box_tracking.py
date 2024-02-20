@@ -55,7 +55,7 @@ class tracker:
             for m,n in matches:
                 if m.distance < 0.67*n.distance:
                     good_matches.append(m)
-            print(len(good_matches))
+            # print(len(good_matches))
 
             if len(good_matches) > 10:
                 template_pts = np.float32([self.template_kp[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
