@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 from read_matrices import read_intrinsics, read_R_T
-from camera_class import Camera, rectify
+from camera_class import Camera, rectify, undistort
 
 from box_tracking import tracker
 from live_classes import object_detector
@@ -47,6 +47,10 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
     right_cam = Camera(camera_matrix= camera_matrix_R, distortion_coefficients= distortion_R,
                    camera_id=cameraR_id, width=width, height=height)
     
+    mapxL, mapyL, mapxR, mapyR, image_ROI = rectify(height, width, left_cam.camera_matrix, left_cam.dist, 
+                                                    right_cam.camera_matrix, right_cam.dist, R2, T2)
+    _, _, new_width, new_height = image_ROI
+
     # initiate both object detectors
     object_model_path = "models\efficientdet_lite0.tflite"
     
@@ -75,9 +79,8 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
         distorted_left = left_cam.read_frame()
         distorted_right = right_cam.read_frame()
 
-        undistorted_left, undistorted_right = rectify(distorted_left.copy(), distorted_right.copy(), 
-                                                      left_cam.camera_matrix, left_cam.dist, 
-                                                      right_cam.camera_matrix, right_cam.dist, R2, T2)
+        undistorted_left = undistort(distorted_left, mapxL, mapyL, image_ROI)
+        undistorted_right = undistort(distorted_right, mapxR, mapyR, image_ROI)
 
         left_bboxes = left_detect.loop_function(undistorted_left)
         left_annotated_frame = left_detect.get_annotated_image()
@@ -130,22 +133,20 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
                 distance, x_coord = dc.find_distances(coordinate_matches, baseline, avg_focal_length)
             
         if left_annotated_frame is not None:
-            h, w, _ = left_annotated_frame.shape
             if move_state:
-                cv2.putText(left_annotated_frame, "GO", (w - 40, h - 20), 
+                cv2.putText(left_annotated_frame, "GO", (new_width - 40, new_height - 20), 
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             else:
-                cv2.putText(left_annotated_frame, "STOP", (w - 80, h - 20), 
+                cv2.putText(left_annotated_frame, "STOP", (new_width - 80, new_height - 20), 
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                 
-            cv2.putText(left_annotated_frame, f"{distance} cm", (10, h - 20), 
+            cv2.putText(left_annotated_frame, f"{distance} cm", (10, new_height - 20), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            cv2.circle(left_annotated_frame, (x_coord, int(h/2)), 4, (0, 0, 255), -1 )
+            cv2.circle(left_annotated_frame, (x_coord, int(new_height/2)), 4, (0, 0, 255), -1 )
             cv2.imshow("Left", left_annotated_frame)
 
         if right_annotated_frame is not None:
-            h, w, _ = right_annotated_frame.shape
-            cv2.putText(right_annotated_frame, f"{distance} cm", (10, h - 20), 
+            cv2.putText(right_annotated_frame, f"{distance} cm", (10, new_height - 20), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             cv2.imshow("Right", right_annotated_frame)
 
