@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import time
 
 from read_matrices import read_intrinsics, read_R_T
 from camera_class import Camera, rectify, undistort
@@ -75,7 +76,15 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
     # false means stop, true means go
     move_state = False
 
+    frame_limit = 5
+    prev = 0
+
+    left_objects = []
+    right_objects = []
+
     while left_cam.opened() and right_cam.opened():
+        time_elapsed = time.time() - prev
+
         distorted_left = left_cam.read_frame()
         distorted_right = right_cam.read_frame()
 
@@ -88,14 +97,23 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
         right_bboxes = right_detect.loop_function(undistorted_right)
         right_annotated_frame = right_detect.get_annotated_image()
 
-        left_objects, left_corners = left_tracker.update(left_bboxes, undistorted_left)
-        right_objects, right_corners = right_tracker.update(right_bboxes, undistorted_right)
+        if time_elapsed > 1./frame_limit:
+            prev = time.time()
 
-        left_target_ID = left_tracker.get_target_ID()
-        right_target_ID = right_tracker.get_target_ID()
+            left_objects, left_corners = left_tracker.update(left_bboxes, undistorted_left)
+            right_objects, right_corners = right_tracker.update(right_bboxes, undistorted_right)
 
-        if left_objects:
-            left_annotated_frame = draw_IDs(left_objects, left_annotated_frame)
+            left_target_ID = left_tracker.get_target_ID()
+            right_target_ID = right_tracker.get_target_ID()            
+                
+            if left_target_ID is not None and right_target_ID is not None:
+                left_target_bbox = left_tracker.get_target_bbox()
+                right_target_bbox = right_tracker.get_target_bbox()
+                matched_image, coordinate_matches = dc.left_right_match(undistorted_left, undistorted_right, 
+                                                                        left_target_bbox, right_target_bbox)
+                
+                if coordinate_matches is not None:
+                    distance, x_coord = dc.find_distances(coordinate_matches, baseline, avg_focal_length)
 
         if left_target_ID is not None:
             left_target_bbox = left_tracker.get_target_bbox()
@@ -114,9 +132,6 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
                 elif gestures == "Thumb_Down":
                     move_state = False
 
-        if right_objects:
-            right_annotated_frame = draw_IDs(right_objects, right_annotated_frame)
-
         if right_target_ID is not None:
             right_target_bbox = right_tracker.get_target_bbox()
             x, y, w, h = right_target_bbox
@@ -124,15 +139,11 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
             cY = int(y + h/2)
             cv2.putText(right_annotated_frame, "Target", (cX - 30, cY + 20),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-            
-        if left_target_ID is not None and right_target_ID is not None:
-            matched_image, coordinate_matches = dc.left_right_match(undistorted_left, undistorted_right, 
-                                                                    left_target_bbox, right_target_bbox)
-            
-            if coordinate_matches is not None:
-                distance, x_coord = dc.find_distances(coordinate_matches, baseline, avg_focal_length)
-            
+               
         if left_annotated_frame is not None:
+            if left_objects:
+                left_annotated_frame = draw_IDs(left_objects, left_annotated_frame)
+
             if move_state:
                 cv2.putText(left_annotated_frame, "GO", (new_width - 40, new_height - 20), 
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
@@ -146,6 +157,9 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
             cv2.imshow("Left", left_annotated_frame)
 
         if right_annotated_frame is not None:
+            if right_objects:
+                right_annotated_frame = draw_IDs(right_objects, right_annotated_frame)
+
             cv2.putText(right_annotated_frame, f"{distance} cm", (10, new_height - 20), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             cv2.imshow("Right", right_annotated_frame)
