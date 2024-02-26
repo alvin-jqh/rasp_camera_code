@@ -32,10 +32,6 @@ def draw_IDs(objects, frame):
 def main(cameraL_id:int, cameraR_id:int, width: int, height: int, 
          port:str, baudrate:int = 9600, timeout:int = 1):
     
-    object_model_path = "models\efficientdet_lite0.tflite"
-    gesture_model_path = "models\gesture_recognizer.task"
-    template_path = "images\cat_image_2.jpg"
-
     # get all the parameters for both cameras
     camera_matrix_L, distortion_L = read_intrinsics("camera_parameters\camera0_intrinsics.dat")
     R1, T1 = read_R_T("camera_parameters\camera0_rot_trans.dat")
@@ -51,30 +47,34 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
 
     # intialise both cameras
     left_cam = Camera(camera_matrix= camera_matrix_L, distortion_coefficients= distortion_L,
-                      camera_id=cameraL_id, width=width, height=height)
+                  camera_id=cameraL_id, width=width, height=height)
 
     right_cam = Camera(camera_matrix= camera_matrix_R, distortion_coefficients= distortion_R,
-                       camera_id=cameraR_id, width=width, height=height)
+                   camera_id=cameraR_id, width=width, height=height)
     
     mapxL, mapyL, mapxR, mapyR, image_ROI = rectify(height, width, left_cam.camera_matrix, left_cam.dist, 
                                                     right_cam.camera_matrix, right_cam.dist, R2, T2)
     _, _, new_width, new_height = image_ROI
 
-    # object detection
+    # initiate both object detectors
+    object_model_path = "models\efficientdet_lite0.tflite"
+    
     left_detect = object_detector(object_model_path)
     right_detect = object_detector(object_model_path)
 
-    # box tracking
+    # initate both trackers
+    template_path = "images\cat_image_2.jpg"
+
     left_tracker = tracker(template_path)
     right_tracker = tracker(template_path)
 
-    # gesture recognition
+    gesture_model_path = "models\gesture_recognizer.task"
     gr = gesture_recogniser(gesture_model_path)
 
     # initialise the distance matching and variables
     dc = match_distance()
-    distance = 100    
-    x_coord = int(new_width/2)
+    distance = 0    
+    x_coord = int(width/2)
     matched_image = None
 
     # false means stop, true means go
