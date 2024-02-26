@@ -1,6 +1,5 @@
 import serial
 import time
-import msvcrt
 
 class SerialCommunication:
     def __init__(self, port, baudrate=9600, timeout=1):
