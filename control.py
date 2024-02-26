@@ -22,7 +22,10 @@ class ctl:
         error_distance = self.setDistance - distance
         error_angle = self.setXcoord - x_coord
 
-        pwmSignal = error_distance * self.distance_coeff
+        if distance >= 100:
+            pwmSignal = error_distance * self.distance_coeff
+        else:
+            pwmSignal = 0
         angle_pwm = error_angle * self.angle_coeff
 
         left_pwm = pwmSignal + angle_pwm
