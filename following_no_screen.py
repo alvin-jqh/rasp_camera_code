@@ -91,6 +91,8 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
     left_objects = []
     right_objects = []
 
+    target_found = False
+
     while left_cam.opened() and right_cam.opened:
         measured_L_speed, measured_R_speed, proximity_flag = line.read_speeds()
 
@@ -108,7 +110,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
 
         if time_elapsed > 1./frame_limit:
             prev = time.time()
-
+            target_found = False
             left_objects, left_corners = left_tracker.update(left_bboxes, undistorted_left)
             right_objects, right_corners = right_tracker.update(right_bboxes, undistorted_right)
 
@@ -120,11 +122,9 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
                 right_target_bbox = right_tracker.get_target_bbox()
                 matched_image, coordinate_matches = dc.left_right_match(undistorted_left, undistorted_right, 
                                                                         left_target_bbox, right_target_bbox)
-                print("Target Found")
+                target_found = True
                 if coordinate_matches is not None:
                     distance, x_coord = dc.find_distances(coordinate_matches, baseline, avg_focal_length)
-            else:
-                print("Target not Found")
 
         if left_target_ID is not None:
             left_target_bbox = left_tracker.get_target_bbox()
@@ -144,6 +144,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
         else:
             new_L_pwm, new_R_pwm = controller.compute_speeds(100, x_coord)
 
+        print(f"Target Found: {target_found}")
         print(f"New Left PWM: {new_L_pwm},   New Right PWM: {new_R_pwm}")
         print(f"Distance: {distance}, Xcoord: {x_coord}, Move State: {move_state}")
 
