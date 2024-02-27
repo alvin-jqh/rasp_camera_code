@@ -103,10 +103,8 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
         undistorted_right = undistort(distorted_right, mapxR, mapyR, image_ROI)
 
         left_bboxes = left_detect.loop_function(undistorted_left)
-        left_annotated_frame = left_detect.get_annotated_image()
 
         right_bboxes = right_detect.loop_function(undistorted_right)
-        right_annotated_frame = right_detect.get_annotated_image()
 
         if time_elapsed > 1./frame_limit:
             prev = time.time()
@@ -129,10 +127,6 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
         if left_target_ID is not None:
             left_target_bbox = left_tracker.get_target_bbox()
             x, y, w, h = left_target_bbox
-            cX = int(x + w/2)
-            cY = int(y + h/2)
-            cv2.putText(left_annotated_frame, "Target", (cX - 30, cY + 20),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             
             target_crop = undistorted_left[y:y+h, x:x+w]
             recognition_frame, gestures = gr.loop_function(target_crop)
@@ -142,41 +136,6 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
                     move_state = True
                 elif gestures == "Thumb_Down":
                     move_state = False
-
-        if right_target_ID is not None:
-            right_target_bbox = right_tracker.get_target_bbox()
-            x, y, w, h = right_target_bbox
-            cX = int(x + w/2)
-            cY = int(y + h/2)
-            cv2.putText(right_annotated_frame, "Target", (cX - 30, cY + 20),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-               
-        if left_annotated_frame is not None:
-            if left_objects:
-                left_annotated_frame = draw_IDs(left_objects, left_annotated_frame)
-
-            if move_state:
-                cv2.putText(left_annotated_frame, "GO", (new_width - 40, new_height - 20), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            else:
-                cv2.putText(left_annotated_frame, "STOP", (new_width - 80, new_height - 20), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-                
-            cv2.putText(left_annotated_frame, f"{distance} cm", (10, new_height - 20), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            cv2.circle(left_annotated_frame, (x_coord, int(new_height/2)), 4, (0, 0, 255), -1 )
-            cv2.imshow("Left", left_annotated_frame)
-
-        if right_annotated_frame is not None:
-            if right_objects:
-                right_annotated_frame = draw_IDs(right_objects, right_annotated_frame)
-
-            cv2.putText(right_annotated_frame, f"{distance} cm", (10, new_height - 20), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            cv2.imshow("Right", right_annotated_frame)
-
-        if matched_image is not None: 
-            cv2.imshow("match image", matched_image)
 
         if move_state:
             new_L_pwm, new_R_pwm = controller.compute_speeds(distance, x_coord)
