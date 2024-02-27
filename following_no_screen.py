@@ -120,9 +120,11 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
                 right_target_bbox = right_tracker.get_target_bbox()
                 matched_image, coordinate_matches = dc.left_right_match(undistorted_left, undistorted_right, 
                                                                         left_target_bbox, right_target_bbox)
-                
+                print("Target Found")
                 if coordinate_matches is not None:
                     distance, x_coord = dc.find_distances(coordinate_matches, baseline, avg_focal_length)
+            else:
+                print("Target not Found")
 
         if left_target_ID is not None:
             left_target_bbox = left_tracker.get_target_bbox()
