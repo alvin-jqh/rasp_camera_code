@@ -92,6 +92,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
     right_objects = []
 
     target_found = False
+    target_lost_counter = 0
 
     while left_cam.opened() and right_cam.opened:
         measured_L_speed, measured_R_speed, proximity_flag = line.read_speeds()
@@ -149,7 +150,13 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
         print(f"Distance: {distance}, Xcoord: {x_coord}, Move State: {move_state}")
 
         if not proximity_flag:
-            line.write_speeds(int(new_L_pwm), int(new_R_pwm))
+            if not target_found:
+                target_lost_counter += 1
+            
+            if target_lost_counter < 30:
+                line.write_speeds(int(new_L_pwm), int(new_R_pwm))
+            else:
+                line.write_speeds(0, 0)
         else:
             line.write_speeds(0, 0)
 
