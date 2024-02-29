@@ -26,7 +26,7 @@ class ctl:
             pwmSignal = error_distance * self.distance_coeff
         else:
             pwmSignal = 0
-        angle_pwm = error_angle * self.angle_coeff
+        angle_pwm = min(error_angle * self.angle_coeff, 50)
 
         left_pwm = pwmSignal + angle_pwm
         right_pwm = pwmSignal - angle_pwm
