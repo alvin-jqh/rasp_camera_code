@@ -152,6 +152,8 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
         if not proximity_flag:
             if not target_found:
                 target_lost_counter += 1
+            else:
+                target_lost_counter = 0
             
             if target_lost_counter < 30:
                 line.write_speeds(int(new_L_pwm), int(new_R_pwm))
