@@ -60,6 +60,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
     dc = match_distance()
     distance = 100    
     x_coord = int(new_width/2)
+    target_center = int(new_width/2)
     matched_image = None
 
     # false means stop, true means go
@@ -115,6 +116,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
         if left_target_ID is not None:
             left_target_bbox = left_tracker.get_target_bbox()
             x, y, w, h = left_target_bbox
+            target_center = int(x + w/2)
             
             target_crop = undistorted_left[y:y+h, x:x+w]
             recognition_frame, gestures = gr.loop_function(target_crop)
