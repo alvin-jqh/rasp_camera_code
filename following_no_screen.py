@@ -14,21 +14,6 @@ from feature_distance import match_distance
 from comms import SerialCommunication
 from control import ctl
 
-def draw_IDs(objects, frame):
-    for objectID, bounding_boxes in objects.items():
-        x,y,w,h = bounding_boxes
-        cX = int(x + w/2)
-        cY = int(y + h/2)
-
-        text = f"ID {objectID}"
-
-        # draw their bounding box centroids and print their ID
-        cv2.putText(frame, text, (cX - 10, cY - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 165, 255), 2)
-        cv2.circle(frame, (cX, cY), 4, (0, 165, 255), -1 )
-
-    return frame
-
 def main(cameraL_id:int, cameraR_id:int, width: int, height: int, 
          port:str, baudrate:int = 9600, timeout:int = 1):
     
