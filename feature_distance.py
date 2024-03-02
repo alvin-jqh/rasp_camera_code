@@ -4,7 +4,7 @@ import numpy as np
 class match_distance:
     def __init__(self):
         # orb feature extractor
-        self.orb = cv2.ORB_create(nfeatures = 200)
+        self.orb = cv2.ORB_create()
 
         # create the flann based matcher
         FLANN_INDEX_LSH = 6
