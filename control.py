@@ -4,7 +4,7 @@ class ctl:
         self.angle_coeff = angle_coeff
 
         self.maxPWM = 255
-        self.maxanglePWM = 45
+        self.maxanglePWM = 35
         self.setDistance = setDistance # in cm
         self.setXcoord = centre_x
     
@@ -27,7 +27,11 @@ class ctl:
             pwmSignal = error_distance * self.distance_coeff
         else:
             pwmSignal = 0
-        angle_pwm = self.clamp(error_angle * self.angle_coeff, self.maxanglePWM)
+        
+        if abs(error_angle) < 40:
+            angle_pwm = 0
+        else:
+            angle_pwm = self.clamp(error_angle * self.angle_coeff, self.maxanglePWM)
 
         left_pwm = pwmSignal + angle_pwm
         right_pwm = pwmSignal - angle_pwm

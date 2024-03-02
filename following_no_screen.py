@@ -58,8 +58,12 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
 
     # initialise the distance matching and variables
     dc = match_distance()
-    distance = 100    
-    x_coord = int(new_width/2)
+    set_distance = 100    
+    set_x_coord = int(new_width/2)
+
+    distance = set_distance
+    x_coord = set_x_coord
+    
     target_center = int(new_width/2)
     matched_image = None
 
@@ -68,7 +72,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
 
     line = SerialCommunication(port, baudrate, timeout)
     line.open_connection()
-    controller = ctl(-2, 0.35, 100, x_coord)
+    controller = ctl(-2, 0.35, set_distance, set_x_coord)
     proximity_flag = False
 
     frame_limit = 5
