@@ -144,10 +144,10 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
                 best_match = None
                 right_disappeared_counter += 1
                 
-                if right_disappeared_counter > 100:
+                if right_disappeared_counter > 50:
                     right_target_bbox = None
 
-        if left_target_bbox is not None and right_target_bbox is not None:
+        if left_target_ID is not None and right_target_bbox is not None:
             matched_image, coordinate_matches = dc.left_right_match(undistorted_left, undistorted_right,
                                                                         left_target_bbox, right_target_bbox)
                 
