@@ -24,7 +24,7 @@ class tracker:
         self.template = cv2.imread(template_path)
 
         # orb feature extractor
-        self.orb = cv2.ORB_create()
+        self.orb = cv2.ORB_create(nfeatures = 300)
 
         # create the flann based matcher
         FLANN_INDEX_LSH = 6
