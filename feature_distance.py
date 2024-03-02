@@ -6,15 +6,17 @@ class match_distance:
         # orb feature extractor
         self.orb = cv2.ORB_create()
 
-        # create the flann based matcher
-        FLANN_INDEX_LSH = 6
-        index_params= dict(algorithm = FLANN_INDEX_LSH,
-                        table_number = 6, # 12
-                        key_size = 12,     # 20
-                        multi_probe_level = 1) #2
-        search_params = dict(checks=50)   # or pass empty dictionary
+        # # create the flann based matcher
+        # FLANN_INDEX_LSH = 6
+        # index_params= dict(algorithm = FLANN_INDEX_LSH,
+        #                 table_number = 6, # 12
+        #                 key_size = 12,     # 20
+        #                 multi_probe_level = 1) #2
+        # search_params = dict(checks=50)   # or pass empty dictionary
 
-        self.flann = cv2.FlannBasedMatcher(index_params, search_params)
+        # self.flann = cv2.FlannBasedMatcher(index_params, search_params)
+
+        self.bf = cv2.BFMatcher(cv2.NORM_HAMMING)
 
     def extract_keypoints_descriptors(self, image, bbox):
         x, y, w, h = bbox
@@ -55,7 +57,7 @@ class match_distance:
         right_kp, right_des = self.extract_keypoints_descriptors(right_image, right_bbox)
 
         if left_des is not None and len(left_des) > 2 and right_des is not None and len(right_des) > 2:
-            matches = self.flann.knnMatch(left_des, right_des, k=2)
+            matches = self.bf.knnMatch(left_des, right_des, k=2)
             matches = [match for match in matches if len(match) == 2]
 
              # Need to draw only good matches, so create a mask
