@@ -57,14 +57,11 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
 
     # initialise the distance matching and variables
     dc = match_distance()
-    set_distance = 100    
+    set_distance = 80
     set_x_coord = int(new_width/2)
 
     distance = set_distance
     x_coord = set_x_coord
-    
-    target_center = int(new_width/2)
-    matched_image = None
 
     # false means stop, true means go
     move_state = False
@@ -99,6 +96,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
         right_bboxes = right_detect.loop_function(undistorted_right)
 
         if counter % frame_interval == 0:
+            target_found = False
             counter = 0
 
             left_objects, left_corners = left_tracker.update(left_bboxes, undistorted_left)
@@ -108,17 +106,19 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
         right_target_ID = right_tracker.get_target_ID()            
             
         if left_target_ID is not None and right_target_ID is not None:
+            target_found = True
             left_target_bbox = left_tracker.get_target_bbox()
             right_target_bbox = right_tracker.get_target_bbox()
 
             left_kp, left_des = left_tracker.get_object_kp_des()
             right_kp, right_des = right_tracker.get_object_kp_des()
-            matched_image, coordinate_matches = dc.left_right_match(undistorted_left, undistorted_right, 
-                                                                    left_target_bbox, right_target_bbox,
-                                                                    left_kp, left_des, right_kp, right_des)
-            
-            if coordinate_matches is not None:
-                distance, x_coord = dc.find_distances(coordinate_matches, baseline, avg_focal_length)
+            if left_kp is not None and right_kp is not None:
+                matched_image, coordinate_matches = dc.left_right_match(undistorted_left, undistorted_right, 
+                                                                        left_target_bbox, right_target_bbox,
+                                                                        left_kp, left_des, right_kp, right_des)
+                
+                if coordinate_matches is not None:
+                    distance, x_coord = dc.find_distances(coordinate_matches, baseline, avg_focal_length)
                 
         if left_target_ID is not None:
             left_target_bbox = left_tracker.get_target_bbox()

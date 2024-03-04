@@ -75,7 +75,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
     # false means stop, true means go
     move_state = False
 
-    frame_interval = 10
+    frame_interval = 2
     counter = 0
 
     left_objects = []
