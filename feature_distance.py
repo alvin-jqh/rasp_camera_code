@@ -46,13 +46,27 @@ class match_distance:
 
         return good_matches_coordinates
 
-    def left_right_match(self, left_image, right_image, left_bbox, right_bbox):
+    def filter_keypoints_and_descriptors_by_bbox(self, keypoints, descriptors, bounding_box):
+        """Filter keypoints and descriptors by bounding box (x, y, w, h)."""
+        x, y, w, h = bounding_box
+        filtered_keypoints = []
+        filtered_descriptors = []
+        for kp, desc in zip(keypoints, descriptors):
+            pt = kp.pt
+            if x <= pt[0] < x + w and y <= pt[1] < y + h:
+                filtered_keypoints.append(kp)
+                filtered_descriptors.append(desc)
+        return np.array(filtered_keypoints), np.array(filtered_descriptors)
+
+    def left_right_match(self, left_image, right_image, left_bbox, right_bbox, left_kp, left_des, right_kp, right_des):
         matched_image = None
         good_matches_coordinates = None
 
         # Extract keypoints and descriptors within the bounding boxes
-        left_kp, left_des = self.extract_keypoints_descriptors(left_image, left_bbox)
-        right_kp, right_des = self.extract_keypoints_descriptors(right_image, right_bbox)
+        # left_kp, left_des = self.extract_keypoints_descriptors(left_image, left_bbox)
+        # right_kp, right_des = self.extract_keypoints_descriptors(right_image, right_bbox)
+        left_kp, left_des = self.filter_keypoints_and_descriptors_by_bbox(left_kp, left_des, left_bbox)
+        right_kp, right_des = self.filter_keypoints_and_descriptors_by_bbox(right_kp, right_des, right_bbox)
 
         if left_des is not None and len(left_des) > 2 and right_des is not None and len(right_des) > 2:
             matches = self.flann.knnMatch(left_des, right_des, k=2)

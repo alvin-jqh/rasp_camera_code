@@ -24,7 +24,7 @@ class tracker:
         self.template = cv2.imread(template_path)
 
         # orb feature extractor
-        self.orb = cv2.ORB_create(nfeatures = 300)
+        self.brisk = cv2.BRISK_create()
 
         # create the flann based matcher
         FLANN_INDEX_LSH = 6
@@ -39,15 +39,15 @@ class tracker:
 
     # get the keypoints and features for the template image
     def extract_template_features(self):
-        self.template_kp, self.template_des = self.orb.detectAndCompute(self.template, None)
+        self.template_kp, self.template_des = self.brisk.detectAndCompute(self.template, None)
 
     # target to tell whether or if the object is the target
     def find_target(self, current_frame):
         transformed_corners = None
-        object_kp, object_des = self.orb.detectAndCompute(current_frame, None)
+        self.object_kp, self.object_des = self.brisk.detectAndCompute(current_frame, None)
 
-        if object_des is not None and len(object_des) > 2:
-            matches = self.flann.knnMatch(self.template_des, object_des, k=2)
+        if self.object_des is not None and len(self.object_des) > 2:
+            matches = self.flann.knnMatch(self.template_des, self.object_des, k=2)
             matches = [match for match in matches if len(match) == 2]
 
             good_matches = []
@@ -59,7 +59,7 @@ class tracker:
 
             if len(good_matches) > 10:
                 template_pts = np.float32([self.template_kp[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
-                current_frame_pts = np.float32([object_kp[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+                current_frame_pts = np.float32([self.object_kp[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 
                 error_threshold = 5
                 H, _ = cv2.findHomography(template_pts, current_frame_pts, cv2.RANSAC, error_threshold)
@@ -82,6 +82,9 @@ class tracker:
             return self.Objects[self.TargetID]
         else:
             return None
+        
+    def get_object_kp_des(self):
+        return self.object_kp, self.object_des
 
     def register(self, bounding_box):
         """Registers a new object with the next ID """
