@@ -24,7 +24,7 @@ class tracker:
         self.template = cv2.imread(template_path)
 
         # orb feature extractor
-        self.brisk = cv2.BRISK_create()
+        self.orb = cv2.ORB_create()
 
         # create the flann based matcher
         FLANN_INDEX_LSH = 6
@@ -39,12 +39,12 @@ class tracker:
 
     # get the keypoints and features for the template image
     def extract_template_features(self):
-        self.template_kp, self.template_des = self.brisk.detectAndCompute(self.template, None)
+        self.template_kp, self.template_des = self.orb.detectAndCompute(self.template, None)
 
     # target to tell whether or if the object is the target
     def find_target(self, current_frame):
         transformed_corners = None
-        self.object_kp, self.object_des = self.brisk.detectAndCompute(current_frame, None)
+        self.object_kp, self.object_des = self.orb.detectAndCompute(current_frame, None)
 
         if self.object_des is not None and len(self.object_des) > 2:
             matches = self.flann.knnMatch(self.template_des, self.object_des, k=2)
