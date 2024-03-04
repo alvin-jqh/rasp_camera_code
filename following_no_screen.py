@@ -106,7 +106,6 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
         right_target_ID = right_tracker.get_target_ID()            
             
         if left_target_ID is not None and right_target_ID is not None:
-            target_found = True
             left_target_bbox = left_tracker.get_target_bbox()
             right_target_bbox = right_tracker.get_target_bbox()
 
@@ -118,6 +117,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
                                                                         left_kp, left_des, right_kp, right_des)
                 
                 if coordinate_matches is not None:
+                    target_found = True
                     distance, x_coord = dc.find_distances(coordinate_matches, baseline, avg_focal_length)
                 
         if left_target_ID is not None:
@@ -137,7 +137,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
         if move_state:
             new_L_pwm, new_R_pwm = controller.compute_speeds(distance, x_coord)
         else:
-            new_L_pwm, new_R_pwm = controller.compute_speeds(100, x_coord)
+            new_L_pwm, new_R_pwm = controller.compute_speeds(set_distance, x_coord)
 
         print(f"Target Found: {target_found}")
         print(f"New Left PWM: {new_L_pwm},   New Right PWM: {new_R_pwm}")
