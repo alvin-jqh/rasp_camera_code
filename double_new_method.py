@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import time
 
 from read_matrices import read_intrinsics, read_R_T
 from camera_class import Camera, rectify, undistort
@@ -76,14 +75,14 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
     # false means stop, true means go
     move_state = False
 
-    frame_limit = 5
-    prev = 0
+    frame_interval = 10
+    counter = 0
 
     left_objects = []
     right_objects = []
 
     while left_cam.opened() and right_cam.opened():
-        time_elapsed = time.time() - prev
+        counter += 1
 
         distorted_left = left_cam.read_frame()
         distorted_right = right_cam.read_frame()
@@ -97,11 +96,11 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int):
         right_bboxes = right_detect.loop_function(undistorted_right)
         right_annotated_frame = right_detect.get_annotated_image()
 
-        # if time_elapsed > 1./frame_limit:
-        #     prev = time.time()
+        if counter % frame_interval == 0:
+            counter = 0
 
-        left_objects, left_corners = left_tracker.update(left_bboxes, undistorted_left)
-        right_objects, right_corners = right_tracker.update(right_bboxes, undistorted_right)
+            left_objects, left_corners = left_tracker.update(left_bboxes, undistorted_left)
+            right_objects, right_corners = right_tracker.update(right_bboxes, undistorted_right)
 
         left_target_ID = left_tracker.get_target_ID()
         right_target_ID = right_tracker.get_target_ID()            

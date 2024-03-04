@@ -1,6 +1,5 @@
 import cv2
-import numpy as np
-import time 
+import numpy as np 
 
 from read_matrices import read_intrinsics, read_R_T
 from camera_class import Camera, rectify, undistort
@@ -75,8 +74,8 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
     controller = ctl(-2, 0.35, set_distance, set_x_coord)
     proximity_flag = False
 
-    frame_limit = 5
-    prev = 0
+    frame_interval = 10
+    counter = 0
 
     left_objects = []
     right_objects = []
@@ -85,9 +84,9 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
     target_lost_counter = 0
 
     while left_cam.opened() and right_cam.opened:
-        measured_L_speed, measured_R_speed, proximity_flag = line.read_speeds()
+        counter += 1
 
-        time_elapsed = time.time() - prev
+        measured_L_speed, measured_R_speed, proximity_flag = line.read_speeds()
 
         distorted_left = left_cam.read_frame()
         distorted_right = right_cam.read_frame()
@@ -99,24 +98,28 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
 
         right_bboxes = right_detect.loop_function(undistorted_right)
 
-        if time_elapsed > 1./frame_limit:
-            prev = time.time()
-            target_found = False
+        if counter % frame_interval == 0:
+            counter = 0
+
             left_objects, left_corners = left_tracker.update(left_bboxes, undistorted_left)
             right_objects, right_corners = right_tracker.update(right_bboxes, undistorted_right)
 
-            left_target_ID = left_tracker.get_target_ID()
-            right_target_ID = right_tracker.get_target_ID()            
-                
-            if left_target_ID is not None and right_target_ID is not None:
-                left_target_bbox = left_tracker.get_target_bbox()
-                right_target_bbox = right_tracker.get_target_bbox()
-                matched_image, coordinate_matches = dc.left_right_match(undistorted_left, undistorted_right, 
-                                                                        left_target_bbox, right_target_bbox)
-                target_found = True
-                if coordinate_matches is not None:
-                    distance, x_coord = dc.find_distances(coordinate_matches, baseline, avg_focal_length)
+        left_target_ID = left_tracker.get_target_ID()
+        right_target_ID = right_tracker.get_target_ID()            
+            
+        if left_target_ID is not None and right_target_ID is not None:
+            left_target_bbox = left_tracker.get_target_bbox()
+            right_target_bbox = right_tracker.get_target_bbox()
 
+            left_kp, left_des = left_tracker.get_object_kp_des()
+            right_kp, right_des = right_tracker.get_object_kp_des()
+            matched_image, coordinate_matches = dc.left_right_match(undistorted_left, undistorted_right, 
+                                                                    left_target_bbox, right_target_bbox,
+                                                                    left_kp, left_des, right_kp, right_des)
+            
+            if coordinate_matches is not None:
+                distance, x_coord = dc.find_distances(coordinate_matches, baseline, avg_focal_length)
+                
         if left_target_ID is not None:
             left_target_bbox = left_tracker.get_target_bbox()
             x, y, w, h = left_target_bbox
