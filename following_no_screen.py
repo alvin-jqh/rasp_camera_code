@@ -111,7 +111,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
 
             left_kp, left_des = left_tracker.get_object_kp_des()
             right_kp, right_des = right_tracker.get_object_kp_des()
-            if left_kp is not None and right_kp is not None:
+            if left_kp is not None and left_des is not None and right_kp is not None and right_des is not None:
                 matched_image, coordinate_matches = dc.left_right_match(undistorted_left, undistorted_right, 
                                                                         left_target_bbox, right_target_bbox,
                                                                         left_kp, left_des, right_kp, right_des)
