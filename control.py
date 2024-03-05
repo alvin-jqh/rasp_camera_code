@@ -24,7 +24,10 @@ class ctl:
         error_angle = self.setXcoord - x_coord
 
         if distance >= self.setDistance:
-            Speed = error_distance * self.distance_coeff
+            if abs(error_distance) < 5 :
+                Speed = 0
+            else:
+                Speed = error_distance * self.distance_coeff
         else:
             Speed = 0
         

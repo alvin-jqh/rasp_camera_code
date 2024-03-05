@@ -68,7 +68,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
 
     line = SerialCommunication(port, baudrate, timeout)
     line.open_connection()
-    controller = ctl(-0.05, 0.01, set_distance, set_x_coord)
+    controller = ctl(-0.04, 0.001, set_distance, set_x_coord)
     proximity_flag = False
 
     frame_interval = 10
