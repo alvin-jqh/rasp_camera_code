@@ -151,8 +151,9 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
             
             if target_lost_counter < 30:
                 line.write_speeds(int(new_L_pwm), int(new_R_pwm))
-            elif 30 < target_lost_counter < 40:
-                line.write_speeds(int(-new_L_pwm), int(-new_R_pwm))
+            # back track if the robot loses the target
+            elif 30 < target_lost_counter < 50:
+                line.write_speeds(int(-1.25 * new_L_pwm), int(-1.25 * new_R_pwm))
             else:
                 line.write_speeds(0, 0)
         else:
