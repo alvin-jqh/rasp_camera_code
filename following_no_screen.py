@@ -68,7 +68,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
 
     line = SerialCommunication(port, baudrate, timeout)
     line.open_connection()
-    controller = ctl(-2, 0.20, set_distance, set_x_coord)
+    controller = ctl(-0.05, 0.01, set_distance, set_x_coord)
     proximity_flag = False
 
     frame_interval = 10
@@ -135,12 +135,12 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
                     move_state = False
 
         if move_state:
-            new_L_pwm, new_R_pwm = controller.compute_speeds(distance, x_coord)
+            new_L_speed, new_R_speed = controller.compute_speeds(distance, x_coord)
         else:
-            new_L_pwm, new_R_pwm = controller.compute_speeds(set_distance, x_coord)
+            new_L_speed, new_R_speed = controller.compute_speeds(set_distance, x_coord)
 
         print(f"Target Found: {target_found}")
-        print(f"New Left PWM: {new_L_pwm},   New Right PWM: {new_R_pwm}")
+        print(f"New Left Speed: {new_L_speed},   New Right Speed: {new_R_speed}")
         print(f"Distance: {distance}, Xcoord: {x_coord}, Move State: {move_state}")
 
         if not proximity_flag:
@@ -150,10 +150,10 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
                 target_lost_counter = 0
             
             if target_lost_counter < 30:
-                line.write_speeds(int(new_L_pwm), int(new_R_pwm))
+                line.write_speeds(new_L_speed, new_R_speed)
             # back track if the robot loses the target
             elif 30 < target_lost_counter < 50:
-                line.write_speeds(int(-1.25 * new_L_pwm), int(-1.25 * new_R_pwm))
+                line.write_speeds(-1.25 * new_L_speed, -1.25 * new_R_speed)
             else:
                 line.write_speeds(0, 0)
         else:

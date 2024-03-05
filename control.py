@@ -3,8 +3,8 @@ class ctl:
         self.distance_coeff = distance_coeff
         self.angle_coeff = angle_coeff
 
-        self.maxPWM = 255
-        self.maxanglePWM = 35
+        self.maxSpeed = 1.2
+        self.maxangleSpeed = 0.2
         self.setDistance = setDistance # in cm
         self.setXcoord = centre_x
     
@@ -24,16 +24,16 @@ class ctl:
         error_angle = self.setXcoord - x_coord
 
         if distance >= self.setDistance:
-            pwmSignal = error_distance * self.distance_coeff
+            Speed = error_distance * self.distance_coeff
         else:
-            pwmSignal = 0
+            Speed = 0
         
         if abs(error_angle) < 60:
-            angle_pwm = 0
+            angle_speed = 0
         else:
-            angle_pwm = self.clamp(error_angle * self.angle_coeff, self.maxanglePWM)
+            angle_speed = self.clamp(error_angle * self.angle_coeff, self.maxangleSpeed)
 
-        left_pwm = pwmSignal + angle_pwm
-        right_pwm = pwmSignal - angle_pwm
+        left_pwm = Speed + angle_speed
+        right_pwm = Speed - angle_speed
 
-        return self.clamp(left_pwm, self.maxPWM), self.clamp(right_pwm, self.maxPWM)
+        return self.clamp(left_pwm, self.maxSpeed), self.clamp(right_pwm, self.maxSpeed)
