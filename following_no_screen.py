@@ -68,7 +68,7 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
 
     line = SerialCommunication(port, baudrate, timeout)
     line.open_connection()
-    controller = ctl(-2, 0.35, set_distance, set_x_coord)
+    controller = ctl(-2, 0.20, set_distance, set_x_coord)
     proximity_flag = False
 
     frame_interval = 10
@@ -151,6 +151,8 @@ def main(cameraL_id:int, cameraR_id:int, width: int, height: int,
             
             if target_lost_counter < 30:
                 line.write_speeds(int(new_L_pwm), int(new_R_pwm))
+            elif 30 < target_lost_counter < 40:
+                line.write_speeds(int(-new_L_pwm), int(-new_R_pwm))
             else:
                 line.write_speeds(0, 0)
         else:

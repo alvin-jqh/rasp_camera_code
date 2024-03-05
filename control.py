@@ -28,7 +28,7 @@ class ctl:
         else:
             pwmSignal = 0
         
-        if abs(error_angle) < 40:
+        if abs(error_angle) < 60:
             angle_pwm = 0
         else:
             angle_pwm = self.clamp(error_angle * self.angle_coeff, self.maxanglePWM)
