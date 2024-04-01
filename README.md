@@ -16,6 +16,7 @@ pip install -r requirements.txt
 This requires two cameras to run the code
 The camera IDs can be changed in the line where the main function is called
 
+
 There are 2 pieces of code that can be run
 ``` double_new_method.py```
 This code only contains the image processing part of the algorithm and no control or communications.
