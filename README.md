@@ -4,7 +4,7 @@
 # Setup
 This code was tested using Python 3.11 and has been tested on windows and linux.
 To work on linux, 2 changes must be done
-all the backward slashes ```\ ``` in any file paths must be replaced by a forward slash``` /```
+all the backward slashes ```\``` in any file paths must be replaced by a forward slash```/```
 line 18 of camera_class.py must be changed to:   ```self.cap = cv2.VideoCapture(self.camera_id)```
 
 Additional packages can be found in requirements.txt and can be installed using command
